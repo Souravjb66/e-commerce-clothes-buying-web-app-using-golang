@@ -9,7 +9,7 @@ import(
 type DBinstace struct{
 	Db *gorm.DB
 }
-
+var Mydb DBinstace
 func(instance *DBinstace) Connect(){
 	dsn:="root:sourav@90###@tcp(localhost:3306)/clouthstore?parseTime=true"
 	db,err:=gorm.Open(mysql.Open(dsn),&gorm.Config{})
@@ -17,7 +17,7 @@ func(instance *DBinstace) Connect(){
 		log.Panic("problem in db connection--!!")
 
 	}
-	instance.Db=db
+	Mydb.Db=db
 	err=db.AutoMigrate(&table.User{},&table.Seller{},&table.Product{},&table.Product_instance{},&table.Payment{},&table.Buyer{},&table.Auth{})
 	if err!=nil{
 		log.Print("table not created ----!!")

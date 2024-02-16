@@ -11,7 +11,7 @@ import (
 func main() {
 	idb:=db.DBinstace{}
 	idb.Connect()
-	mydb:=idb.Db
+	mydb:=db.Mydb.Db
 	defer func(){
 		lb,err:=mydb.DB()
 		if err!=nil{

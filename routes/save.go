@@ -9,12 +9,11 @@ import (
 	"net/http"
 	"strconv"
     "html/template"
-	"gorm.io/gorm"
+	// "gorm.io/gorm"
+	base "mainweb/database"
 )
-var db *gorm.DB
-func Asign(database *gorm.DB){
-	db=database
-}
+
+
 
 func Saveuser(w http.ResponseWriter,r *http.Request){//here both user & auth save
 	r.ParseForm()
@@ -39,8 +38,9 @@ func Saveuser(w http.ResponseWriter,r *http.Request){//here both user & auth sav
 		},
 
 	}
-	userlogs:=db.Create(&user)
+	userlogs:=base.Mydb.Db.Create(&user)
 	if userlogs!=nil{
+		
 		log.Println(userlogs)
 	}
 	
@@ -53,7 +53,7 @@ func SaveSeller(w http.ResponseWriter,r *http.Request){ //saving only seller we 
 	r.ParseForm()
 	fpass:=r.FormValue("password")
 	femail:=r.FormValue("email_id")
-	getbool:=mdware.SellerEmail(&femail,db)
+	getbool:=mdware.SellerEmail(&femail,base.Mydb.Db)
 	if getbool{
 		json.NewEncoder(w).Encode("email alredy registered")
 		return
@@ -63,7 +63,7 @@ func SaveSeller(w http.ResponseWriter,r *http.Request){ //saving only seller we 
 		Email_id: r.FormValue("email_id"),
 		Password: password,
 	}
-	sellerlogs:=db.Create(&seller)
+	sellerlogs:=base.Mydb.Db.Create(&seller)
 	if sellerlogs!=nil{
 		log.Println(sellerlogs)
 	}
@@ -90,14 +90,14 @@ func SaveProducts(w http.ResponseWriter,r *http.Request){
 		Price:uint(price),
 		Total: uint(total),
 	}
-	getprid:=mdware.FindByEmail(&email,db)
+	getprid:=mdware.FindByEmail(&email,base.Mydb.Db)
 	
 	Product=append(Product, myprod)
 	sellertable:=models.Seller{
 		Id:getprid,  //giving primary key to identify that email row
 		Products: Product,
 	}
-    prodlogs:=db.Save(&sellertable)
+    prodlogs:=base.Mydb.Db.Save(&sellertable)
 	// prodlogs:=db.Create(&product)
 	if prodlogs!=nil{
 		log.Println(prodlogs)
@@ -116,7 +116,7 @@ func SaveBuyer(w http.ResponseWriter,r *http.Request){
 		// Name string `json:"name" gorm:"not null"`
 	}
 	var collect buy
-	torf:=mdware.BuyerExist(&collect.Email_id,db)
+	torf:=mdware.BuyerExist(&collect.Email_id,base.Mydb.Db)
 	if !torf{
 		log.Println("wrong email--!")
 		w.WriteHeader(http.StatusNotFound)
@@ -124,7 +124,7 @@ func SaveBuyer(w http.ResponseWriter,r *http.Request){
 	}
 	json.NewDecoder(r.Body).Decode(&collect)
 	value:=collect.Amount
-    prob:=mdware.PaymentDone(&value,&collect.Email_id,db)
+    prob:=mdware.PaymentDone(&value,&collect.Email_id,base.Mydb.Db)
 	if !prob{
 		log.Println("please select correct")
 		return
@@ -141,15 +141,15 @@ func SaveBuyer(w http.ResponseWriter,r *http.Request){
 		Buyerinstance: buyer,
 	}
 	
-	db.Create(&buyer)
-	db.Create(&paybil)
+	base.Mydb.Db.Create(&buyer)
+	base.Mydb.Db.Create(&paybil)
 	json.NewEncoder(w).Encode("payment done")
 	
 }
 func LoginUser(w http.ResponseWriter,r *http.Request){
 	email:=r.FormValue("email_id")
 	password:=r.FormValue("password")
-	result:=mdware.Authenticate(&email,&password,db)
+	result:=mdware.Authenticate(&email,&password,base.Mydb.Db)
 	if !result{
 		log.Println("check your input")
 		return

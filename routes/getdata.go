@@ -5,13 +5,11 @@ import (
 	"log"
 	"mainweb/models"
 	"net/http"
+	base "mainweb/database"
 
-	"gorm.io/gorm"
+	
 )
-var gdb *gorm.DB
-func Asigninget(database *gorm.DB){
-	gdb=database
-}
+
 
 func GetAllBuyerProduct(w http.ResponseWriter,r *http.Request){
     type buyer struct{
@@ -22,7 +20,7 @@ func GetAllBuyerProduct(w http.ResponseWriter,r *http.Request){
 	var buyerdata buyer
 	products:=buyerdata.ProductInstance
 	r.ParseForm()
-	err:=gdb.Preload("ProductInstance").Find(&buyerdata,r.FormValue("EMAIL_ID"))
+	err:=base.Mydb.Db.Preload("ProductInstance").Find(&buyerdata,r.FormValue("EMAIL_ID"))
 	if err!=nil{
 		log.Println(err)
 	}
@@ -39,7 +37,7 @@ func GetAllProduct(w http.ResponseWriter,r *http.Request){
 	    Total uint `json:"total" gorm:"not null"`
 	}
 	products:=product{}
-	if err:=gdb.Find(&products);err!=nil{
+	if err:=base.Mydb.Db.Find(&products);err!=nil{
 		log.Println(err)
 		
 	}
