@@ -2,33 +2,43 @@ package middleware
 
 import (
 	// "encoding/json"
+	
 	"log"
 	"mainweb/models"
-	"gorm.io/gorm"
+	"sync"
+
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 )
 func SellerEmail(email *string,db *gorm.DB)bool{
-	err:=db.First(&models.Seller{},*email)
+	type seller struct{
+		Email_id string `json:"email_id" gorm:"not null"`
+	}
+	var sl1 seller
+	err:=db.Where("email_id = ?", *email).First(&sl1)
 	if err!=nil{
 		log.Println(err)
-		return false
-
+		
 	}
+    var semail string =sl1.Email_id
+	if semail==""{
+		log.Println("empty string")
+		return false
+	}
+
 	return true
-
-
 }
 func PaymentDone(amount *uint,email *string,db *gorm.DB)bool{
 	type userauth struct{  //can require to add all firlds
 		Balance uint `json:"balance"`
-
 	}
+	
 	var auth models.Auth
 	user:=userauth{}
 	err:=db.Find(&user,"email_id=?",*email)
 	if err!=nil{
 		log.Println("user not exist and you check out payment done method ")
-		return false
+		// return false
 	}
 	
 	total:=user.Balance
@@ -37,7 +47,13 @@ func PaymentDone(amount *uint,email *string,db *gorm.DB)bool{
 		return false
 		
 	}
-	total=total-*amount
+	var wg sync.Mutex
+	func(){
+		wg.Lock()
+		defer wg.Unlock()
+		total=total-*amount
+
+	}()
 	
 	auth.Balance=total
 	db.Save(&auth)
@@ -45,26 +61,40 @@ func PaymentDone(amount *uint,email *string,db *gorm.DB)bool{
 	return true
 
 }
-func FindByEmail(email *string,db *gorm.DB)int{
-	type seller struct{
-		Id int `json:"id" gorm:"primary_Key"`
-	    Email_id string `json:"email_id" gorm:"not null"`
-	    Password string `json:"password" gorm:"not null" `
-	    Products []models.Product `json:"productid" gorm:"foreignKey:SellerId"`
-
-	}
-	var slr seller
-	err:=db.First(&slr,*email)
+func FindByEmail(sendpass *string,email *string,db *gorm.DB)models.Seller{
+	
+	seller:=models.Seller{}
+	err:=db.Where("email_id=?",*email).First(&seller)
 	if err!=nil{
 		log.Println(err)
 	}
-	return slr.Id
+	if seller.Email_id==""{
+		log.Println("wrong email")
+		return seller
+	}
+	newvalue:=bcrypt.CompareHashAndPassword([]byte(seller.Password),[]byte(*sendpass))
+	if newvalue!=nil{
+		log.Println("problem in seller password in hash compare!!!")
+		log.Println(newvalue)
+		
+	}
+	
+	log.Println(seller.Id)
+	return seller
 
 }
 func BuyerExist(email *string,db *gorm.DB)bool{
-	err:=db.First(&models.Auth{},*email)
+	type buyer struct{
+		Email_id string `json:"email_id" gorm:"not null"`
+	    Password string `json:"password" gorm:"not null"`
+	}
+	var minauth buyer
+	err:=db.Where("email_id =?",*email).First(&minauth)
 	if err!=nil{
 		log.Println(err)
+		
+	}
+	if minauth.Email_id==""{
 		return false
 	}
 	return true
@@ -78,9 +108,12 @@ func Authenticate(email *string,password *string,db *gorm.DB)bool{
 	
 	var myauth auth
 	bytepass:=[]byte(*password)
-	ar:=db.Find(&myauth,*email)
+	ar:=db.Where("email_id=?",*email).Find(&myauth)
 	if ar!=nil{
 		log.Println("in authenticate!!!",ar)
+		
+	}
+	if myauth.Email_id==""{
 		return false
 	}
 

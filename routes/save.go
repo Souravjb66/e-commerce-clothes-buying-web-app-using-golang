@@ -56,8 +56,10 @@ func SaveSeller(w http.ResponseWriter,r *http.Request){ //saving only seller we 
 	getbool:=mdware.SellerEmail(&femail,base.Mydb.Db)
 	if getbool{
 		json.NewEncoder(w).Encode("email alredy registered")
+		log.Println("!!!",getbool)
 		return
 	}
+	
 	password:=mdware.CreateHash(&fpass)
 	seller:=models.Seller{
 		Email_id: r.FormValue("email_id"),
@@ -82,22 +84,24 @@ func SaveProducts(w http.ResponseWriter,r *http.Request){
 		log.Println(er2)
 	}
 	
-	var Product []models.Product 
 	var email string = r.FormValue("email_id")
+	var password string=r.FormValue("password")
 	myprod:=models.Product{
 		Name: r.FormValue("name"),
 		Brand: r.FormValue("brand"),
 		Price:uint(price),
 		Total: uint(total),
+
 	}
-	getprid:=mdware.FindByEmail(&email,base.Mydb.Db)
+	getprid:=mdware.FindByEmail(&password,&email,base.Mydb.Db)
 	
-	Product=append(Product, myprod)
-	sellertable:=models.Seller{
-		Id:getprid,  //giving primary key to identify that email row
-		Products: Product,
+	if getprid.Email_id==""{
+		log.Println("wrong email")
+		return
 	}
-    prodlogs:=base.Mydb.Db.Save(&sellertable)
+	getprid.Products=append(getprid.Products, myprod)
+	
+    prodlogs:=base.Mydb.Db.Save(&getprid)
 	// prodlogs:=db.Create(&product)
 	if prodlogs!=nil{
 		log.Println(prodlogs)
@@ -183,5 +187,13 @@ func Loginfile(w http.ResponseWriter,r *http.Request){
 }
 func Cardfile(w http.ResponseWriter,r *http.Request){
 	temp,_:=template.ParseFiles("templates/card.html")
+	temp.Execute(w,nil)
+}
+func AddproductFile(w http.ResponseWriter,r *http.Request){
+	temp,_:=template.ParseFiles("templates/addproduct.html")
+	temp.Execute(w,nil)
+}
+func Createseller(w http.ResponseWriter,r *http.Request){
+	temp,_:=template.ParseFiles("templates/sellercreate.html")
 	temp.Execute(w,nil)
 }

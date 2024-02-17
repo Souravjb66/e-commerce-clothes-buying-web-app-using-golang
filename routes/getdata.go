@@ -36,7 +36,7 @@ func GetAllProduct(w http.ResponseWriter,r *http.Request){
 	    Price uint `json:"price" gorm:"not null"`
 	    Total uint `json:"total" gorm:"not null"`
 	}
-	products:=product{}
+	products:=[]product{}
 	if err:=base.Mydb.Db.Find(&products);err!=nil{
 		log.Println(err)
 		

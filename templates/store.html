@@ -6,14 +6,49 @@
     <title>home</title>
 </head>
 <body>
-    <div>
-        <h1>welcome to my store</h1>
+    <div style="height:100vh;width:100%;">
+        <h1 style="color:black">welcome to my store</h1>
         <div>
-            <h2></h2>
-            <p></p>
-            <p></p>
+            <h2 id="brand"></h2>
+            <p id="name"></p>
+            <p id="price"></p>
+            <button id="b1">click</button>
         </div>
     </div>
+    <script>
+        var button=document.getElementById("b1").addEventListener("click",showme)
+        function showme(){
+            console.log("click")
+        }
+        async function getData(){
+            const response=await fetch("/getdata/get-all-products")
+            
+            const data=response.json()
+            console.log("in main ",data)
+            
+            data.then(d1=>{
+                console.log(d1)
+                
+                console.log(d1[1].name)
+                
+                document.getElementById("brand").innerText=d1[i].brand
+                document.getElementById("name").innerText=d1[i].name
+                document.getElementById("price").innerText=d1[i].price
+
+                
+                
+
+                
+            
+            }).catch(err=>{
+                console.log(err)
+            })
+            
+            
+        }
+        window.onload=getData
+
+    </script>
     
 </body>
 </html>
