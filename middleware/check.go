@@ -29,19 +29,20 @@ func SellerEmail(email *string,db *gorm.DB)bool{
 	return true
 }
 func PaymentDone(amount *uint,email *string,db *gorm.DB)bool{
-	type userauth struct{  //can require to add all firlds
-		Balance uint `json:"balance"`
-	}
+	// type userauth struct{  //can require to add all firlds
+	// 	Balance uint `json:"balance"`
+	// }
 	
 	var auth models.Auth
-	user:=userauth{}
-	err:=db.Find(&user,"email_id=?",*email)
+	// user:=userauth{}
+	err:=db.Find(&auth,"email_id=?",*email)
 	if err!=nil{
-		log.Println("user not exist and you check out payment done method ")
+		// log.Println("user not exist and you check out payment done method ")
+		log.Println(err)
 		// return false
 	}
 	
-	total:=user.Balance
+	total:=auth.Balance
 	if total<*amount{
 		log.Println("low balance in your account")
 		return false
@@ -84,17 +85,22 @@ func FindByEmail(sendpass *string,email *string,db *gorm.DB)models.Seller{
 
 }
 func BuyerExist(email *string,db *gorm.DB)bool{
-	type buyer struct{
-		Email_id string `json:"email_id" gorm:"not null"`
-	    Password string `json:"password" gorm:"not null"`
-	}
-	var minauth buyer
-	err:=db.Where("email_id =?",*email).First(&minauth)
+	// type buyer struct{
+	// 	Email_id string `json:"email_id" gorm:"not null"`
+	//     Password string `json:"password" gorm:"not null"`
+	// }
+	// var minauth buyer
+	log.Println("fir :",*email)
+	var mx models.Auth
+	err:=db.Where("email_id =?",*email).Find(&mx)
 	if err!=nil{
+		log.Println("email id !!!!!!")
 		log.Println(err)
 		
 	}
-	if minauth.Email_id==""{
+	log.Println("email ::",mx.Email_id)
+	if mx.Email_id==""{
+		log.Println("not a valid buyer")
 		return false
 	}
 	return true

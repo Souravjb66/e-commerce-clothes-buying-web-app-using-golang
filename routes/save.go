@@ -116,17 +116,23 @@ func SaveBuyer(w http.ResponseWriter,r *http.Request){
 	    Phone_no string `json:"phone_no" gorm:"not null"`
 		Product []models.Product_instance `json:"product" gorm:"not null"`
 		Amount uint `json:"amount" gorm:"not null"`
+		
 		// Brand string `json:"brand" gorm:"not null"`
 		// Name string `json:"name" gorm:"not null"`
 	}
 	var collect buy
+	json.NewDecoder(r.Body).Decode(&collect)
+	
+	log.Printf("email :%v, ph no:%v, prod:%v, amount: %v",collect.Email_id,collect.Phone_no,collect.Product,collect.Amount)
+	
 	torf:=mdware.BuyerExist(&collect.Email_id,base.Mydb.Db)
 	if !torf{
 		log.Println("wrong email--!")
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	json.NewDecoder(r.Body).Decode(&collect)
+	
+	
 	value:=collect.Amount
     prob:=mdware.PaymentDone(&value,&collect.Email_id,base.Mydb.Db)
 	if !prob{
@@ -139,14 +145,20 @@ func SaveBuyer(w http.ResponseWriter,r *http.Request){
 		Phone_no: collect.Phone_no,
 		ProductInstance:collect.Product ,
 	}
+	// secbuy:=models.Buyer{
+	// 	Email_id: collect.Email_id,
+	// 	Phone_no: collect.Phone_no,
+
+	// }
+
 	// var paybil models.Payment
 	paybil:=models.Payment{
 		Amount: collect.Amount,
 		Buyerinstance: buyer,
 	}
-	
-	base.Mydb.Db.Create(&buyer)
 	base.Mydb.Db.Create(&paybil)
+	base.Mydb.Db.Create(&buyer)
+	
 	json.NewEncoder(w).Encode("payment done")
 	
 }

@@ -7,7 +7,7 @@ type Product_instance struct{
 	Brand string `json:"brand" gorm:"not null"`
 	Name string `json:"name" gorm:"not null"`
 	Price uint `json:"price" gorm:"not null"`
-	ProductBuyer []Buyer `json:"producbuyer" gorm:"many2many:buyer_product"`
+	ProductBuyer []Buyer `json:"productbuyer" gorm:"many2many:buyer_product"`
 	
 
 }
