@@ -12,12 +12,13 @@ import (
 
 
 func GetAllBuyerProduct(w http.ResponseWriter,r *http.Request){
-    type buyer struct{
+    type Buyer struct{
 		Email_id string `json:"email_id" gorm:"not null"`
 	    Phone_no string `json:"phone_no" gorm:"not null"`
 		ProductInstance []models.Product_instance 
+		PaymentId int `json:"payment_id"`
 	}
-	var buyerdata buyer
+	var buyerdata Buyer
 	products:=buyerdata.ProductInstance
 	r.ParseForm()
 	err:=base.Mydb.Db.Preload("ProductInstance").Find(&buyerdata,r.FormValue("EMAIL_ID"))

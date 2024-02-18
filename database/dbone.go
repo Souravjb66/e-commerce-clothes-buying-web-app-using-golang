@@ -11,7 +11,8 @@ type DBinstace struct{
 }
 var Mydb DBinstace
 func(instance *DBinstace) Connect(){
-	dsn:="root:sourav@90###@tcp(localhost:3306)/clouthstore?parseTime=true"
+	
+	dsn:=Addons()
 	db,err:=gorm.Open(mysql.Open(dsn),&gorm.Config{})
 	if err!=nil{
 		log.Panic("problem in db connection--!!")

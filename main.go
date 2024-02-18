@@ -9,6 +9,8 @@ import (
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	
+	
 )
 func main() {
 	idb:=db.DBinstace{}
@@ -22,11 +24,13 @@ func main() {
 		}
 		lb.Close()
 	}()
+	
 
 	router := mux.NewRouter()
 	callSave(router,&wg)
 	callGet(router,&wg)
 	frontend(router)
+	
     wg.Wait()
 
     headers:=handlers.AllowedHeaders([]string{"Content-Type","Authorization"})
