@@ -7,5 +7,5 @@ type User struct{
 	Phone_no string `json:"phone_no" gorm:"not null"`
 	Email_id string `json:"email_id" gorm:"not null"`
 	Password string `json:"password" gorm:"not null"`
-	Authentication Auth `json:"auth" foreignKey:"UserId"`
+	Authentication Auth `json:"auth" gorm:"foreignKey:UserId"`
 }
